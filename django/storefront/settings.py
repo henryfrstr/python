@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'tags',
     'likes',
     'debug_toolbar',
+    'store_custom',
 ]
 
 MIDDLEWARE = [
