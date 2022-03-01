@@ -7,6 +7,7 @@ from .models import Customer, Collection, Product, Order, OrderItem
 
 @admin.register(Collection)
 class CollectionAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['featured_product']
     list_display = ('title', 'product_count')
     search_fields = ('title',)
 
@@ -17,7 +18,7 @@ class CollectionAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">{}</a>', url, collection.products_count)
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(products_count=Count('product'))
+        return super().get_queryset(request).annotate(products_count=Count('products'))
 
 
 class InventoryFilter(admin.SimpleListFilter):
@@ -37,7 +38,7 @@ class InventoryFilter(admin.SimpleListFilter):
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ['collection']
-    search_fields = ('product',)
+    search_fields = ('title',)
     prepopulated_fields = {
         'slug': ['title']
     }
@@ -64,13 +65,14 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'membership', 'order_count')
+    list_display = ('first_name', 'last_name', 'membership', 'orders')
     list_editable = ('membership',)
     list_per_page = 10
+    ordering = ['first_name', 'last_name']
     search_fields = ('first_name__istartswith', 'last_name__istartswith')
 
     @admin.display(ordering='orders_count')
-    def order_count(self, customer):
+    def orders(self, customer):
         url = reverse('admin:store_order_changelist') + \
             '?' + urlencode({'customer__id': str(customer.id)})
         return format_html('<a href="{}">{}</a>', url, customer.orders_count)
